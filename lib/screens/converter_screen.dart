@@ -20,7 +20,8 @@ class ConverterScreen extends StatefulWidget {
 }
 
 class _ConverterScreenState extends State<ConverterScreen> {
-  final TextEditingController _amountController = TextEditingController(text: "1.0");
+  final TextEditingController _amountController =
+      TextEditingController(text: "1.0");
   String _fromCurrency = "bitcoin";
   String _toCurrency = "ethereum";
   double? _convertedValue;
@@ -28,7 +29,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
 
   ConversionState _state = ConversionState.idle;
   String _errorMessage = "";
-  
+
   final Map<String, _CacheEntry> _rateCache = {};
   Timer? _debounce;
   bool _isRequestInProgress = false;
@@ -48,7 +49,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
     "tether": Icons.money,
     "usd": Icons.attach_money,
     "inr": Icons.currency_rupee,
-     "cardano": Icons.album_outlined
+    "cardano": Icons.album_outlined
   };
 
   @override
@@ -87,7 +88,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
         return;
       }
     }
-    
+
     if (_amountController.text.isEmpty) return;
 
     setState(() {
@@ -97,10 +98,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
     });
 
     try {
-      final rate = await ApiService.getConversionRate(_fromCurrency, _toCurrency);
+      final rate =
+          await ApiService.getConversionRate(_fromCurrency, _toCurrency);
       _rateCache[cacheKey] = _CacheEntry(rate, now);
       _updateSuccessState(rate);
-
     } on RateLimitException {
       if (_rateCache.containsKey(cacheKey)) {
         final entry = _rateCache[cacheKey]!;
@@ -113,16 +114,16 @@ class _ConverterScreenState extends State<ConverterScreen> {
     } catch (e) {
       _updateErrorState("An unexpected error occurred.");
     } finally {
-       if(mounted) {
-         setState(() {
-           _isRequestInProgress = false;
-         });
-       }
+      if (mounted) {
+        setState(() {
+          _isRequestInProgress = false;
+        });
+      }
     }
   }
 
   void _updateSuccessState(double rate) {
-    if(!mounted) return;
+    if (!mounted) return;
     final amount = double.tryParse(_amountController.text) ?? 0;
     setState(() {
       _rate = rate;
@@ -132,7 +133,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
   }
 
   void _updateRateLimitedState(double staleRate) {
-     if(!mounted) return;
+    if (!mounted) return;
     final amount = double.tryParse(_amountController.text) ?? 0;
     setState(() {
       _rate = staleRate;
@@ -143,7 +144,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
   }
 
   void _updateErrorState(String message) {
-    if(!mounted) return;
+    if (!mounted) return;
     setState(() {
       _rate = null;
       _convertedValue = null;
@@ -160,11 +161,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
     });
     _convert(forceNetwork: true);
   }
-  
+
   void _onCurrencyChanged() {
     _convert(forceNetwork: true);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -230,15 +230,19 @@ class _ConverterScreenState extends State<ConverterScreen> {
             label: "From",
             currency: _fromCurrency,
             onCurrencyChanged: (val) {
-              if(val != null) {
+              if (val != null) {
                 setState(() => _fromCurrency = val);
                 _onCurrencyChanged();
               }
             },
             child: TextField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.right,
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -254,7 +258,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
             label: "To",
             currency: _toCurrency,
             onCurrencyChanged: (val) {
-               if(val != null) {
+              if (val != null) {
                 setState(() => _toCurrency = val);
                 _onCurrencyChanged();
               }
@@ -286,7 +290,6 @@ class _ConverterScreenState extends State<ConverterScreen> {
       case ConversionState.rateLimited:
       case ConversionState.success:
       case ConversionState.idle:
-      default:
         final resultText = _convertedValue?.toStringAsFixed(6) ?? "-";
         child = Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -294,7 +297,10 @@ class _ConverterScreenState extends State<ConverterScreen> {
           children: [
             Text(
               resultText,
-              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold),
             ),
             if (_state == ConversionState.rateLimited)
               const Text(
@@ -330,8 +336,9 @@ class _ConverterScreenState extends State<ConverterScreen> {
     );
   }
 
-  Widget _buildCurrencySelector(String label, String currency, ValueChanged<String?> onCurrencyChanged) {
-     return Container(
+  Widget _buildCurrencySelector(
+      String label, String currency, ValueChanged<String?> onCurrencyChanged) {
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey[800],
@@ -386,7 +393,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
     if (_state == ConversionState.error || _rate == null) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -396,25 +403,29 @@ class _ConverterScreenState extends State<ConverterScreen> {
       ),
       child: Column(
         children: [
-           Text(
+          Text(
             "1 ${_currencySymbols[_fromCurrency]} = ${_rate?.toStringAsFixed(4)} ${_currencySymbols[_toCurrency]}",
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500
-            ),
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-               if (_state == ConversionState.rateLimited)
-                const Icon(Icons.history_toggle_off, color: Colors.amber, size: 16),
-               if (_state == ConversionState.rateLimited)
+              if (_state == ConversionState.rateLimited)
+                const Icon(Icons.history_toggle_off,
+                    color: Colors.amber, size: 16),
+              if (_state == ConversionState.rateLimited)
                 const SizedBox(width: 4),
               Text(
-                _state == ConversionState.rateLimited ? "Recent rate" : "Real-time rate",
-                style: TextStyle(color: _state == ConversionState.rateLimited ? Colors.amber : Colors.grey[400], fontSize: 14),
+                _state == ConversionState.rateLimited
+                    ? "Recent rate"
+                    : "Real-time rate",
+                style: TextStyle(
+                    color: _state == ConversionState.rateLimited
+                        ? Colors.amber
+                        : Colors.grey[400],
+                    fontSize: 14),
               ),
             ],
           ),
@@ -423,7 +434,9 @@ class _ConverterScreenState extends State<ConverterScreen> {
             width: double.infinity,
             height: 60,
             child: ElevatedButton(
-              onPressed: _state == ConversionState.loading ? null : () => _convert(forceNetwork: true),
+              onPressed: _state == ConversionState.loading
+                  ? null
+                  : () => _convert(forceNetwork: true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 disabledBackgroundColor: Colors.teal.withOpacity(0.5),
@@ -456,24 +469,28 @@ class _ConverterScreenState extends State<ConverterScreen> {
       ),
     );
   }
-  
+
   Widget _buildQuickConversionButtons() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Text("Quick Conversions", style: TextStyle(color: Colors.grey[300], fontSize: 16, fontWeight: FontWeight.w600)),
-         const SizedBox(height: 12),
-         SizedBox(
-           height: 40,
-           child: ListView(
-             scrollDirection: Axis.horizontal,
-             children: [
-               _quickButton("bitcoin", "ethereum"),
-               _quickButton("ethereum", "cardano"),
-               _quickButton("bitcoin", "usd"),
-             ],
-           ),
-         )
+        Text("Quick Conversions",
+            style: TextStyle(
+                color: Colors.grey[300],
+                fontSize: 16,
+                fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _quickButton("bitcoin", "ethereum"),
+              _quickButton("ethereum", "cardano"),
+              _quickButton("bitcoin", "usd"),
+            ],
+          ),
+        )
       ],
     );
   }
@@ -491,17 +508,19 @@ class _ConverterScreenState extends State<ConverterScreen> {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.grey[850],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey[700]!)
-        ),
+            color: Colors.grey[850],
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey[700]!)),
         child: Row(
           children: [
-            Text("${_currencySymbols[from]} → ${_currencySymbols[to]}", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+            Text("${_currencySymbols[from]} → ${_currencySymbols[to]}",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500)),
           ],
         ),
       ),
     );
   }
-
 }
